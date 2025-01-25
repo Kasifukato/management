@@ -1,12 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mobile Barcode Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <style>
+        body { text-align: center; margin-top: 20px; }
+        #scanner-container { width: 100%; max-width: 500px; margin: 0 auto; }
+        #start-btn, #stop-btn { 
+            padding: 10px 20px; 
+            margin: 10px; 
+            font-size: 16px; 
+        }
+    </style>
+</head>
+<body>
+    <button id="start-btn" onclick="startScanner()">Start Scanner</button>
+    <button id="stop-btn" onclick="stopScanner()" style="display:none;">Stop Scanner</button>
+    <div id="scanner-container"></div>
+
     <script>
+        let scannerRunning = false;
+
         function startScanner() {
+            if (scannerRunning) return;
+
             Quagga.init({
                 inputStream: {
                     name: "Live",
@@ -22,36 +40,50 @@
             }, function(err) {
                 if (err) {
                     console.error(err);
-                    alert("Error starting scanner");
                     return;
                 }
                 Quagga.start();
+                scannerRunning = true;
+                document.getElementById('start-btn').style.display = 'none';
+                document.getElementById('stop-btn').style.display = 'inline-block';
             });
 
-            Quagga.onDetected(function(data) {
-                let barcode = data.codeResult.code;
-                alert(`Scanned: ${barcode}`);
+            // Remove any previous onDetected event listener
+            Quagga.offDetected();
 
-                // Send the scanned barcode to the server
-                fetch("save_scan.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `barcode=${barcode}`
-                }).then(response => response.text())
-                  .then(result => console.log(result))
-                  .catch(error => console.error("Error:", error));
-
-                Quagga.stop();
-
-                // Send the barcode to `billing.php` using a JavaScript function to update the form
-                window.opener.updateBarcodeFromScanner(barcode);
+            // Add the event listener for barcode detection
+            Quagga.onDetected(function(result) {
+                const barcode = result.codeResult.code;
+                
+                fetch('scan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'barcode=' + encodeURIComponent(barcode)
+                })
+                .then(response => response.text())
+                .then(result => {
+                    console.log(result);
+                    alert('Barcode scanned: ' + barcode);
+                    
+                    // Optional: Keep scanner running for multiple scans
+                    // stopScanner();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
         }
+
+        function stopScanner() {
+            if (scannerRunning) {
+                Quagga.stop();
+                scannerRunning = false;
+                document.getElementById('start-btn').style.display = 'inline-block';
+                document.getElementById('stop-btn').style.display = 'none';
+            }
+        }
     </script>
-</head>
-<body>
-    <h1>Mobile Barcode Scanner</h1>
-    <button onclick="startScanner()">Start Scanner</button>
-    <div id="scanner-container" style="width: 100%; height: 300px; border: 1px solid black;"></div>
 </body>
 </html>

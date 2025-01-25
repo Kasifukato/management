@@ -60,6 +60,48 @@ $total_revenue_query = "SELECT SUM(sale_price * quantity) AS total_revenue FROM 
 $total_revenue_result = mysqli_query($con, $total_revenue_query);
 $total_revenue_row = mysqli_fetch_assoc($total_revenue_result);
 $total_revenue = $total_revenue_row['total_revenue'] ?? 0;
+
+
+// Calculate top selling
+$top_selling_query = "
+    SELECT 
+        products.name, 
+        SUM(sales.qty) AS total_sold 
+    FROM sales
+    JOIN products ON sales.product_id = products.id
+    WHERE sales.date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    GROUP BY sales.product_id
+    ORDER BY total_sold DESC
+    LIMIT 2";
+$top_selling_result = mysqli_query($con, $top_selling_query);
+
+$top_selling_items = [];
+if ($top_selling_result) {
+    while ($row = mysqli_fetch_assoc($top_selling_result)) {
+        $top_selling_items[] = $row;
+    }
+}
+
+// Query to get the count of low-stock products based on category thresholds
+$low_stock_query = "
+    SELECT COUNT(*) AS low_stock_count
+    FROM products 
+    JOIN categories ON products.categorie_id = categories.id
+    WHERE products.quantity < categories.threshold
+";
+
+
+$low_stock_result = mysqli_query($con, $low_stock_query);
+
+// Error checking
+if ($low_stock_result === false) {
+    die("Error executing query: " . mysqli_error($con));
+}
+
+$low_stock_count = 0;
+$row = mysqli_fetch_assoc($low_stock_result);
+$low_stock_count = $row['low_stock_count'] ?? 0; // Default to 0 if null
+
 ?>
 
 <?php include_once('layouts/header.php'); ?>
@@ -122,7 +164,7 @@ $total_revenue = $total_revenue_row['total_revenue'] ?? 0;
 											<span class="counter"><?php echo "Rs." . number_format($total_revenue, 2); ?></span>
 										</div>
 										<div class="last_updated">
-											<small class="text-muted">Reveneu</small>
+											<small class="text-muted">Total Value</small>
 										</div>
 									</div>
 								</div>
@@ -135,6 +177,24 @@ $total_revenue = $total_revenue_row['total_revenue'] ?? 0;
 									<a href="#"><span class="icon-ellipses"></span></a>
 								</div>
 								<div class="infocounter__details">
+    <?php if (!empty($top_selling_items)) : ?>
+        <?php foreach ($top_selling_items as $item) : ?>
+            <div class="overall-meta">
+                <div class="meta-info">
+                    <span class="counter"><?php echo htmlspecialchars($item['total_sold']); ?></span>
+                </div>
+                <div class="last_updated">
+                    <small class="text-muted"><?php echo htmlspecialchars($item['name']); ?></small>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <div class="overall-meta">
+            <small class="text-muted">No data available</small>
+        </div>
+    <?php endif; ?>
+</div>
+								<!-- <div class="infocounter__details">
 									<div class="overall-meta">
 										<div class="meta-info">
 											<span class="counter">5</span>
@@ -151,34 +211,24 @@ $total_revenue = $total_revenue_row['total_revenue'] ?? 0;
 											<small class="text-muted">Last 7 Days</small>
 										</div>
 									</div>
-								</div>
+								</div> -->
 							</div>
+							
+
+
 						</div>
 						<div class="col xs-12 sx-6 sm-3">
-							<div class="infocounter">
-								<div class="infocounter__title">
-									<span class="text" style="color: #C70039;">Low Stocks</span>
-									<a href="#"><span class="icon-ellipses"></span></a>
-								</div>
-								<div class="infocounter__details">
-									<div class="overall-meta">
-										<div class="meta-info">
-											<span class="counter">12</span>
-										</div>
-										<div class="last_updated">
-											<small class="text-muted">Ordered</small>
-										</div>
-									</div>
-									<div class="overall-meta">
-										<div class="meta-info">
-											<span class="counter">2</span>
-										</div>
-										<div class="last_updated">
-											<small class="text-muted">Not In Stock</small>
-										</div>
-									</div>
-								</div>
-							</div>
+						<div class="infocounter">
+    <div class="infocounter__title">
+        <span class="text" style="color: #C70039;">Low Stocks</span>
+    </div>
+    <div class="infocounter__details">
+        <div class="meta-info">
+            <span class="counter"><?php echo $low_stock_count; ?></span>
+        </div>
+    </div>
+</div>
+
 						</div>
 					</div>
 				</div>

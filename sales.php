@@ -1,10 +1,10 @@
 <?php
-$page_title = 'All sale';
+$page_title = 'All Sales';
 require_once('includes/load.php');
 page_require_level(3);
-$sales = find_all_sale();
+$sales = find_all_sale(); // Assumes this function fetches all sales including payment method
 
-// Navigation to add_product.php
+// Navigation to add_sale.php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_sale'])) {
 	header("Location: add_sale.php");
 	exit;
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_sale'])) {
 										<div class="form__module">
 											<div class="form__action">
 												<span class="icon-add"></span>
-												<input type="submit" class="button primary-tint" value="Add sales" name="add_sale">
+												<input type="submit" class="button primary-tint" value="Add Sale" name="add_sale">
 											</div>
 										</div>
 									</div>
@@ -53,32 +53,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_sale'])) {
 													<th class="name">S.N.</th>
 													<th class="name">Product Name</th>
 													<th class="Quantity">Quantity</th>
-													<th class="Total">Totals</th>
+													<th class="Total">Total</th>
+													<th class="Payment">Payment Method</th>
 													<th class="Date">Date</th>
 													<th class="action">Action</th>
 												</tr>
 											</thead>
 											<tbody>
-
-												<?php foreach ($sales as $sale):?>
+												<?php foreach ($sales as $sale): ?>
 													<tr>
-														<td class="text-center"><?php echo count_id();?></td>
+														<td class="text-center"><?php echo count_id(); ?></td>
 														<td><?php echo remove_junk($sale['name']); ?></td>
 														<td class="text-center"><?php echo (int)$sale['qty']; ?></td>
 														<td class="text-center"><?php echo remove_junk($sale['price']); ?></td>
+														<td class="text-center"><?php echo !empty($sale['payment']) ? remove_junk($sale['payment']) : 'Not Paid'; ?></td>
+
 														<td class="text-center"><?php echo $sale['date']; ?></td>
 														<td class="text-center">
 															<div class="btn-group">
-																<a href="edit_sale.php?id=<?php echo (int)$sale['id'];?>" class="btn btn-warning btn-xs"  title="Edit" data-toggle="tooltip">
+																<a href="edit_sale.php?id=<?php echo (int)$sale['id']; ?>" class="btn btn-warning btn-xs" title="Edit" data-toggle="tooltip">
 																	<span class="icon-edit"></span>
 																</a>
-																<a href="delete_sale.php?id=<?php echo (int)$sale['id'];?>" class="btn btn-danger btn-xs"  title="Delete" data-toggle="tooltip">
+																<a href="delete_sale.php?id=<?php echo (int)$sale['id']; ?>" class="btn btn-danger btn-xs" title="Delete" data-toggle="tooltip">
 																	<span class="icon-trash"></span>
 																</a>
 															</div>
 														</td>
 													</tr>
-												<?php endforeach;?>
+												<?php endforeach; ?>
 											</tbody>
 										</table>
 									</div>

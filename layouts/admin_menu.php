@@ -13,6 +13,22 @@
 			<li class="has-drop">
 				<div class="knav sub-btn">
 					<a href="#">
+						<span class="icon-setting"></span>
+						<span class="txt">Management</span>
+					</a>
+					<button type="button"><span class="icon-keyboard_arrow_right dropdown"></span></button>
+				</div>
+				<div class="kdrop sub-menu">
+					<ul>
+						<li><a href="manage_suppliers.php">Manage Suppliers</a></li>
+						<li><a href="users.php">Manage Users</a></li>
+						<li><a href="group.php">Manage Groups</a></li>
+					</ul>
+				</div>
+			</li>
+			<li class="has-drop">
+				<div class="knav sub-btn">
+					<a href="#">
 						<span class="icon-inventory"></span>
 						<span class="txt">Analysis</span>
 					</a>
@@ -41,12 +57,19 @@
 					</a>
 				</div>
 			</li>
-			<li>
+			<li class="has-drop">
 				<div class="knav sub-btn">
-					<a href="orders.php">
+					<a href="#">
 						<span class="icon-order"></span>
 						<span class="txt">Orders</span>
 					</a>
+					<button type="button"><span class="icon-keyboard_arrow_right dropdown"></span></button>
+				</div>
+				<div class="kdrop sub-menu">
+					<ul>
+						<li><a href="orders.php">Status</a></li>
+						<li><a href="history.php">History</a></li>
+					</ul>
 				</div>
 			</li>
 			<li>
@@ -84,16 +107,15 @@
 			<li class="has-drop">
 				<div class="knav sub-btn">
 					<a href="#">
-						<span class="icon-setting"></span>
-						<span class="txt">Management</span>
+						<span class="icon-order"></span>
+						<span class="txt">Extra</span>
 					</a>
 					<button type="button"><span class="icon-keyboard_arrow_right dropdown"></span></button>
 				</div>
 				<div class="kdrop sub-menu">
 					<ul>
-						<li><a href="manage_suppliers.php">Manage Suppliers</a></li>
-						<li><a href="users.php">Manage Users</a></li>
-						<li><a href="group.php">Manage Groups</a></li>
+						<li><a href="details.php">Details</a></li>
+						<li><a href="billing.php">Billing</a></li>
 					</ul>
 				</div>
 			</li>

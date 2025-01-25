@@ -19,13 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $order_id = $_POST['order_id'];
         $action = $_POST['action'];
-        
+
         if ($action === 'accept') {
             // Get the sent quantity and product id to update the product quantity
-            $order_query = $db->query("SELECT product_id, sent_quantity FROM orders WHERE id = '{$order_id}' LIMIT 1");
+            $order_query = $db->query("SELECT product_id, sent_quantity, supplier_id, required_quantity, expiry_time FROM orders WHERE id = '{$order_id}' LIMIT 1");
             $order_data = $order_query->fetch_assoc();
             $product_id = $order_data['product_id'];
             $sent_quantity = $order_data['sent_quantity'];
+            $supplier_id = $order_data['supplier_id'];
+            $required_quantity = $order_data['required_quantity'];
+            $expiry_time = $order_data['expiry_time'];
 
             // Update the product's quantity
             $db->query("UPDATE products SET quantity = quantity + {$sent_quantity} WHERE id = '{$product_id}'");
@@ -33,24 +36,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Mark the order as accepted
             $db->query("UPDATE orders SET is_accepted = 1 WHERE id = '{$order_id}'");
 
+            // Log the accepted action into order_history
+            $db->query("INSERT INTO order_history (order_id, product_id, supplier_id, required_quantity, sent_quantity, expiry_time, action) 
+                        VALUES ('{$order_id}', '{$product_id}', '{$supplier_id}', '{$required_quantity}', '{$sent_quantity}', '{$expiry_time}', 'accepted')");
+
             $session->msg('s', "Order accepted and product quantity updated.");
-	redirect('orders.php');
+            redirect('orders.php');
 
         } elseif ($action === 'decline') {
-            // Delete the order from the database
+            // Get order details for logging
+            $order_query = $db->query("SELECT product_id, supplier_id, required_quantity, sent_quantity, expiry_time FROM orders WHERE id = '{$order_id}' LIMIT 1");
+            $order_data = $order_query->fetch_assoc();
+            $product_id = $order_data['product_id'];
+            $supplier_id = $order_data['supplier_id'];
+            $required_quantity = $order_data['required_quantity'];
+            $sent_quantity = $order_data['sent_quantity'];
+            $expiry_time = $order_data['expiry_time'];
+
+            // Log the declined action into order_history
+            $db->query("INSERT INTO order_history (order_id, product_id, supplier_id, required_quantity, sent_quantity, expiry_time, action) 
+                        VALUES ('{$order_id}', '{$product_id}', '{$supplier_id}', '{$required_quantity}', '{$sent_quantity}', '{$expiry_time}', 'declined')");
+
+            // Delete the order from the orders table
             $db->query("DELETE FROM orders WHERE id = '{$order_id}'");
 
-            $msg = "Order declined and removed.";
-			redirect('orders.php');
+            $session->msg('w', "Order declined and logged in history.");
+            redirect('orders.php');
         }
     }
 }
+
+
 
 // Navigation to add_product.php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_orders'])) {
     header("Location: add_orders.php");
     exit;
 }
+
+
 ?>
 
 <?php include_once('layouts/header.php'); ?>

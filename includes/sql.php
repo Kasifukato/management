@@ -292,15 +292,18 @@ function find_higest_saleing_product($limit)
 /*--------------------------------------------------------------*/
 /* Function for find all sales
  /*--------------------------------------------------------------*/
-function find_all_sale()
-{
+ function find_all_sale() {
   global $db;
-  $sql  = "SELECT s.id,s.qty,s.price,s.date,p.name";
+  // Adjusting the join condition to match the correct column name in 'products' table
+  $sql  = "SELECT s.id, s.qty, s.price, s.date, p.name, s.payment"; // Ensure 'payment' is selected
   $sql .= " FROM sales s";
-  $sql .= " LEFT JOIN products p ON s.product_id = p.id";
+  $sql .= " LEFT JOIN products p ON p.id = s.product_id"; // Assuming 'id' is the correct column in 'products' table
   $sql .= " ORDER BY s.date DESC";
-  return find_by_sql($sql);
+  $result = $db->query($sql);
+  return $result;
 }
+
+
 /*--------------------------------------------------------------*/
 /* Function for Display Recent sale
  /*--------------------------------------------------------------*/

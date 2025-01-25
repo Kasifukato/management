@@ -14,19 +14,29 @@ page_require_level(3);
                     if (product) {
                         document.getElementById("productBarcode").textContent = product.barcode;
                         document.getElementById("productName").textContent = product.name;
+                        document.getElementById("productCategory").textContent = product.category_name;
                         document.getElementById("productStatus").textContent = product.status;
                         document.getElementById("productQuantity").textContent = product.quantity;
+						document.getElementById("supplierName").textContent = product.supplier_name; 
+						document.getElementById("supplierContact").textContent = product.supplier_contact;
+						document.getElementById("productImage").src = product.media_file_name;
+						document.getElementById("productThreshold").textContent = product.threshold;
                     } else {
                         document.getElementById("productBarcode").textContent = "N/A";
                         document.getElementById("productName").textContent = "N/A";
+						document.getElementById("productCategory").textContent = "N/A";
                         document.getElementById("productStatus").textContent = "N/A";
                         document.getElementById("productQuantity").textContent = "N/A";
+						document.getElementById("supplierName").textContent = "N/A";
+						document.getElementById("supplierContact").textContent = "N/A"; 
+						document.getElementById("productImage").src = "images/default_image.jpg";
+						document.getElementById("productThreshold").textContent = "N/A";
                     }
                 })
                 .catch(error => console.error("Error:", error));
         }
 
-        setInterval(fetchDetails, 2000); // Fetch details every 2 seconds
+        
     </script>
 				<div class="workboard__heading">
 					<h1 class="workboard__title">Product Info</h1>
@@ -38,7 +48,7 @@ page_require_level(3);
 								<div class="info">
 									<div class="row">
 										<div class="col xs-12 sx-6">
-											<span>Maggi</span>
+											<span></span>
 										</div>
 										<div class="col xs-12 sx-6">
 											<div class="site-panel">
@@ -59,8 +69,8 @@ page_require_level(3);
 									<div class="col xs-12">
 										<div class="horizonal--nav">
 											<ul>
-												<li><a href="view.html">Overview</a></li>
-												<li><a href="inhistory.html">History</a></li>
+												<li><a href="details.php">Overview</a></li>
+												<li><a href="history.php">History</a></li>
 												<li><a href="purchase.html">Purchases</a></li>
 											</ul>
 										</div>
@@ -86,16 +96,16 @@ page_require_level(3);
 															</tr>
 															<tr>
 																<th scope="row">Product Category</th>
-																<td>Instant Food</td>
+																<td><span id="productCategory">Waiting...</span></td>
 															</tr>
 															<tr>
 																<th scope="row">Status</th>
 																<td><span id="productStatus">Waiting...</span></td>
 															</tr>
-															<tr>
+															<!-- <tr>
 																<th scope="row">Quantity</th>
 																<td><span id="productQuantity">Waiting...</span></td>
-															</tr>
+															</tr> -->
 														</table>
 													</div>
 												</div>
@@ -107,11 +117,11 @@ page_require_level(3);
 														<table>
 															<tr>
 																<th scope="row">Supplier name</th>
-																<td>Rabin Chettri</td>
+																<td><span id="supplierName">Waiting...</span>
 															</tr>
 															<tr>
 																<th scope="row">Contact Number</th>
-																<td>9822789400</td>
+																<td><span id="supplierContact">Waiting...</span>
 															</tr>
 														</table>
 													</div>
@@ -143,26 +153,26 @@ page_require_level(3);
 											<div class="right__panel">
 												<div class="profile__img">
 													<div class="profile--img">
-														<img src="images/img2.png" alt="profileimg" width="150px"  height="150px">
+													<img id="productImage" src="images/default_image.jpg" alt="product image" width="150px" height="150px">
 													</div>
 												</div>
 												<div class="tbl-wrap">
 													<table id="listing__table">
-														<tr>
+														<!-- <tr>
 															<th scope="row">Opening Stock</th>
 															<td>40</td>
-														</tr>
+														</tr> -->
 														<tr>
 															<th scope="row">Remaning Stock</th>
-															<td>34</td>
+															<td><span id="productQuantity">Waiting...</span></td>
 														</tr>
-														<tr>
+														<!-- <tr>
 															<th scope="row">On the Way</th>
 															<td>15</td>
-														</tr>
+														</tr> -->
 														<tr>
 															<th scope="row">Threshold Value</th>
-															<td>12</td>
+															<td><span id="productThreshold">Waiting...</span></td>
 														</tr>
 													</table>
 												</div>
@@ -174,3 +184,4 @@ page_require_level(3);
 						</div>
 					</div>
 				</div>
+				<?php include_once('layouts/footer.php'); ?>

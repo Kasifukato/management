@@ -8,7 +8,7 @@ $search_result = null;
 $search_query = '';
 
 if (isset($_POST['add_sale'])) {
-    $req_fields = array('quantity', 'price', 'total', 'date', 'product_id');
+    $req_fields = array('quantity', 'price', 'total', 'date', 'product_id', 'payment');
     validate_fields($req_fields);
 
     if (empty($errors)) {
@@ -16,10 +16,11 @@ if (isset($_POST['add_sale'])) {
         $quantity = $db->escape((int)$_POST['quantity']);
         $total = $db->escape($_POST['total']);
         $date = $db->escape($_POST['date']);
+        $payment = $db->escape($_POST['payment']);
         $sale_date = date("Y-m-d", strtotime($date));
 
-        $sql = "INSERT INTO sales (product_id, qty, price, total, date) VALUES 
-                ('{$product_id}', '{$quantity}', '{$total}', '{$total}', '{$sale_date}')";
+        $sql = "INSERT INTO sales (product_id, qty, price, total, date, payment) VALUES 
+                ('{$product_id}', '{$quantity}', '{$total}', '{$total}', '{$sale_date}', '{$payment}')";
         $result = $db->query($sql);
 
         if ($result && $db->affected_rows() === 1) {
@@ -35,36 +36,36 @@ if (isset($_POST['add_sale'])) {
         redirect('add_sale.php', false);
     }
 }
+
 if (isset($_POST['delete_sale'])) {
-  $s_id = $db->escape((int)$_POST['s_id']);
+    $s_id = $db->escape((int)$_POST['s_id']);
 
-  // Fetch the sale details
-  $sql = "SELECT * FROM sales WHERE product_id = '{$s_id}'";
-  $result = $db->query($sql);
+    // Fetch the sale details
+    $sql = "SELECT * FROM sales WHERE product_id = '{$s_id}'";
+    $result = $db->query($sql);
 
-  if ($db->num_rows($result) > 0) {
-      $sale = $db->fetch_assoc($result);
-      $qty_sold = $sale['qty'];
+    if ($db->num_rows($result) > 0) {
+        $sale = $db->fetch_assoc($result);
+        $qty_sold = $sale['qty'];
 
-      // Delete the sale
-      $delete_sql = "DELETE FROM sales WHERE product_id = '{$s_id}'";
-      if ($db->query($delete_sql)) {
-          // Restore the quantity in the products table
-          $update_stock = "UPDATE products SET quantity = quantity + {$qty_sold} WHERE id = '{$s_id}'";
-          $db->query($update_stock);
+        // Delete the sale
+        $delete_sql = "DELETE FROM sales WHERE product_id = '{$s_id}'";
+        if ($db->query($delete_sql)) {
+            // Restore the quantity in the products table
+            $update_stock = "UPDATE products SET quantity = quantity + {$qty_sold} WHERE id = '{$s_id}'";
+            $db->query($update_stock);
 
-          $session->msg('s', "Sale deleted, and stock restored successfully.");
-          redirect('add_sale.php', false);
-      } else {
-          $session->msg('d', 'Failed to delete sale!');
-          redirect('add_sale.php', false);
-      }
-  } else {
-      $session->msg('d', 'Sale not found!');
-      redirect('add_sale.php', false);
-  }
+            $session->msg('s', "Sale deleted, and stock restored successfully.");
+            redirect('add_sale.php', false);
+        } else {
+            $session->msg('d', 'Failed to delete sale!');
+            redirect('add_sale.php', false);
+        }
+    } else {
+        $session->msg('d', 'Sale not found!');
+        redirect('add_sale.php', false);
+    }
 }
-
 
 // Handle product search
 if (isset($_POST["submit"])) {
@@ -131,6 +132,7 @@ if (isset($_POST["submit"])) {
              <th> Sell Qty </th>
              <th> Total </th>
              <th> Date </th>
+             <th> Payment Method </th>
              <th> Action </th>
          </tr>
      </thead>
@@ -153,6 +155,13 @@ if (isset($_POST["submit"])) {
             <input type='date' name='date' required>
             </td>
             <td>
+            <select name='payment' required>
+                <option value='' disabled selected>Select Payment</option>
+                <option value='Cash'>Cash</option>
+                <option value='Online'>Online</option>
+            </select>
+            </td>
+            <td>
             <input type='hidden' name='product_id' value='{$row['id']}'>
             <input type='hidden' name='price' value='{$row['sale_price']}'>
             <button type='submit' name='add_sale' class='btn btn-success btn-sm'>Add</button>
@@ -161,7 +170,7 @@ if (isset($_POST["submit"])) {
             </tr>";
         }
     } else {
-        echo "<tr><td colspan='7' class='text-center'>No products found</td></tr>";
+        echo "<tr><td colspan='8' class='text-center'>No products found</td></tr>";
     }
     ?>
 </tbody>
